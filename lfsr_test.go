@@ -19,5 +19,3 @@ func TestLfsr32(t *testing.T) {
 	}
 
 }
-
-rand.Int32

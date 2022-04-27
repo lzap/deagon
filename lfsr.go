@@ -1,7 +1,5 @@
 package deagon
 
-const mask25bit int = 0x1ffffff
-
 func lfsr8(seed uint8) uint8 {
 	s := seed
 	b := (s >> 0) ^ (s >> 2) ^ (s >> 3) ^ (s >> 4)

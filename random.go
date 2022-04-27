@@ -1,7 +1,8 @@
 package deagon
 
-func random25(seed int64) (value uint32, seedNext int64) {
-	//r := rand.NewSource(seed)
-	//rand.Int31n()
-	return 0, 0
+import "math/rand"
+
+func RandomName(formatter Formatter) string {
+	n := rand.Int31n(mask25bits)
+	return getName(n, formatter)
 }
