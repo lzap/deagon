@@ -1,6 +1,8 @@
 package deagon
 
 import "strings"
+import "golang.org/x/text/cases"
+import "golang.org/x/text/language"
 
 type Formatter interface {
 	Format(firstname, surname string) string
@@ -23,7 +25,8 @@ func NewCapitalizedSpaceFormatter() *CapitalizedSpaceFormatter {
 }
 
 func (*CapitalizedSpaceFormatter) Format(firstname, surname string) string {
-	return strings.Title(strings.ToLower(firstname)) + " " + strings.Title(strings.ToLower(surname))
+	caser := cases.Title(language.Dutch)
+	return caser.String(strings.ToLower(firstname)) + " " + caser.String(strings.ToLower(surname))
 }
 
 type LowercaseDashFormatter struct{}
