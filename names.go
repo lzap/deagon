@@ -6,10 +6,17 @@ import (
 )
 
 const (
-	mask25bits    int32 = 0x1FFFFFF
+	// Full 25 bit mask (33_554_432)
+	maskFull int32 = 0x1FFFFFF
+	// Masks for male, female and surname
 	maskGender    int32 = 0x0000001
 	maskGivenName int32 = 0x00001FE
 	maskSurname   int32 = 0x1FFFE00
+	// Total number of entries
+	totalEntriesFull      int32 = 33554432 // 2 ^ 25
+	totalEntriesGender    int32 = 1
+	totalEntriesGivenName int32 = 256   // 2 ^ 8
+	totalEntriesSurname   int32 = 65536 // 2 ^ 16
 )
 
 func findName(ix int32, data []byte, length int32) string {

@@ -4,18 +4,20 @@ import (
 	"testing"
 )
 
-func TestLfsr32(t *testing.T) {
-	var seed uint8 = 0
-	var v uint8 = lfsr8(seed)
-	c := 1
-
-	for v != seed {
-		v = lfsr8(v)
-		c++
-		println(c, v)
-		if c > 0xffffffff {
-			t.Error("lfsr32 did not complete the full period and restarted at ", c)
-		}
+func testWithInitialValue(t *testing.T, start int) {
+	value := start
+	for i := 0; i < int(totalEntriesFull)-1; i++ {
+		value = lfsr25(value)
 	}
+	if value != start {
+		t.Error("period is not 2^25!")
+	}
+}
 
+func TestPseudoRandom25Starting1(t *testing.T) {
+	testWithInitialValue(t, 1)
+}
+
+func TestPseudoRandom25Starting42(t *testing.T) {
+	testWithInitialValue(t, 42)
 }
