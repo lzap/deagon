@@ -25,3 +25,13 @@ func NewCapitalizedSpaceFormatter() *CapitalizedSpaceFormatter {
 func (*CapitalizedSpaceFormatter) Format(firstname, surname string) string {
 	return strings.Title(strings.ToLower(firstname)) + " " + strings.Title(strings.ToLower(surname))
 }
+
+type LowercaseDashFormatter struct{}
+
+func NewLowercaseDashFormatter() *LowercaseDashFormatter {
+	return &LowercaseDashFormatter{}
+}
+
+func (*LowercaseDashFormatter) Format(firstname, surname string) string {
+	return strings.ToLower(firstname) + "-" + strings.ToLower(surname)
+}

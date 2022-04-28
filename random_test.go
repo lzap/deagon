@@ -12,10 +12,10 @@ func TestRandomName(t *testing.T) {
 		args args
 		want string
 	}{
-		{args{NewUppercaseSpaceFormatter()}, "ALTON AABERG"},
-		{args{NewUppercaseSpaceFormatter()}, "ALISA AABERG"},
-		{args{NewUppercaseSpaceFormatter()}, "ABEL AABERG"},
-		{args{NewUppercaseSpaceFormatter()}, "AIMEE AABERG"},
+		{args{NewCapitalizedSpaceFormatter()}, "Anna Plemons"},
+		{args{NewCapitalizedSpaceFormatter()}, "Alisa Delorge"},
+		{args{NewCapitalizedSpaceFormatter()}, "Sonja Luisi"},
+		{args{NewCapitalizedSpaceFormatter()}, "Inez Alviar"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.want, func(t *testing.T) {

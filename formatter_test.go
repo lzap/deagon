@@ -41,3 +41,22 @@ func TestCapitalizedSpaceFormatter(t *testing.T) {
 		}
 	}
 }
+
+func TestLowercaseDashFormatter(t *testing.T) {
+	want := []string{
+		"aaron-aaberg",
+		"ada-aaberg",
+		"abel-aaberg",
+		"addie-aaberg",
+		"adam-aaberg",
+		"adele-aaberg",
+		"alan-aaberg",
+		"agnes-aaberg",
+	}
+	for i := 0; i < 8; i++ {
+		got := getName(int32(i), NewLowercaseDashFormatter())
+		if want[i] != got {
+			t.Fatalf(`Expected to get %s but got %#q`, want[i], got)
+		}
+	}
+}
