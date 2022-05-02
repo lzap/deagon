@@ -21,6 +21,12 @@ generators are available.
 
 Similar project exists for Ruby too: https://github.com/lzap/deacon
 
+### Installation
+
+```
+# go install github.com/lzap/deagon@latest
+```
+
 ### Command line tool
 
 To generate a random name, just use the CLI utility:
