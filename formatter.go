@@ -8,6 +8,16 @@ type Formatter interface {
 	Format(firstname, surname string) string
 }
 
+type EmptyFormatter struct{}
+
+func NewEmptyFormatter() *EmptyFormatter {
+	return &EmptyFormatter{}
+}
+
+func (*EmptyFormatter) Format(_, _ string) string {
+	return ""
+}
+
 type UppercaseSpaceFormatter struct{}
 
 func NewUppercaseSpaceFormatter() *UppercaseSpaceFormatter {

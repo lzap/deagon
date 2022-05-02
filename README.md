@@ -14,108 +14,120 @@ therefore generated names are never longer than 14 characters (5+1+8).
 
 This gives 33,554,432 (25 bits) total of male and female name combinations.
 Built-in generator can either generate randomized succession, or generate
-combinations based on MAC adresses.
+combinations based on MAC addresses.
+
+Both command line utility and Go library with random or unique pseudorandom sequence
+generators are available.
 
 Similar project exists for Ruby too: https://github.com/lzap/deacon
 
-### Random generator
+### Command line tool
 
-The random name generator makes use of [Fibonacci linear feedback shift
-register](https://en.wikipedia.org/wiki/Linear_feedback_shift_register) which
-gives deterministic sequence of pseudo-random numbers. Additionally, algorithm
-makes sure names with same first name (or gender) and last name are not
-returned in succession. Since there are about 1% of such cases, there are
-about 33 million unique total names. Example sequence:
+To generate a random name, just use the CLI utility:
 
-* velma-pratico.my.lan
-* angie-warmbrod.my.lan
-* grant-goodgine.my.lan
-* alton-sieber.my.lan
-* velma-vanbeek.my.lan
-* don-otero.my.lan
-* sam-hulan.my.lan
+```
+# generate
+Elisabeth Sobeck
+```
 
-The polynomial used in linear feedback shift register is
+To generate output in lower case without space:
 
-	x^25 + x^24 + x^23 + x^22 + 1.
+```
+# generate -d
+ted-faron
+```
 
-The key thing is to store register (a number) and use it for each generation
-in order to get non-repeating sequence of name combinations. See an example
-below.
+To generate arbitrary amount of random names:
 
-### MAC generator
+```
+# generate -n 10
+Tyler Vilar
+Ester Boniface
+Melba Forkell
+Irma Paolello
+Sara Stika
+Pedro Dockins
+Molly Stogden
+Bryan Mayhue
+Logan Bushner
+Shane Bondi
+```
 
-Examples of MAC-based names:
+To generate sequence of unique names, you must provide a starting seed number between 1 and 2^25-2 (33,554,430).
+The names are guaranteed to be unique. The last line contains the next seed value that must be passed in
+to continue in the unique sequence.
 
-* 24:a4:3c:ec:76:06 -> bobby-louie-sancher-weeler.my.lan
-* 24:a4:3c:e3:d3:92 -> bob-louie-sancher-rimando.my.lan
+```
+# generate -n 10 -s 130513
+Jamie Abundis
+Neil Abelardo
+Ruben Abaunza
+Teri Lebert
+Tony Rizer
+Vicky Sutler
+Wanda Keaser
+Wendy Doubek
+Jim Burda
+Emma Markee
+18612351
 
-MAC addresses with same OID part (24:a4:3c in this case) generates the same
-middle name ("Louie Sancher" in the example above), therefore it is possible to
-guess server (or NIC) vendor from it, or it should be possible to shorten
-middle names (e.g. bobby-ls-weeler.my.lan) in homogeneous environments.
+```
 
-## Comparison of types
+### Go library
 
-MAC-based advantages
+The library provides random generation:
 
-* reprovisioning the same server generates the same name
-* middle names are same for unique hardware vendors
+```go
+package main
 
-MAC-based disadvantages
+import (
+	"fmt"
+	"github.com/lzap/deagon"
+	"math/rand"
+	"time"
+)
 
-* name is longer
+func main() {
+	rand.Seed(time.Now().UnixNano())
+	
+	// generate lower case with dash
+	fmt.Println(deagon.RandomName(deagon.NewLowercaseDashFormatter()))
+	
+	// generate capitalized with space
+	fmt.Println(deagon.RandomName(deagon.NewCapitalizedSpaceFormatter()))
+	
+	// generate pseudorandom unique sequence
+	seed := 543235432
+	nextSeed, name1 := deagon.PseudoRandomName(seed, true, deagon.NewCapitalizedSpaceFormatter())
+	_, name2 := deagon.PseudoRandomName(nextSeed, true, deagon.NewCapitalizedSpaceFormatter())
+	fmt.Println(name1, name2)
+}
+```
 
-Random-based advantages
+### Pseudo-random generator
 
-* name is shorter
+Generating names randomly does not guarantee uniqueness. There is, however, a technique
+called full cycle feedback register that ensures that two outputs never repeat for a given
+sequence of pseudorandom numbers.
 
-Random-based disadvantages
+How it works, you pick a random integer between 1 and 2^25-2 (33,554,430) and pass it to a
+function which returns a random name and the next number in the full cycle sequence. You need
+to store the number somewhere (database) and the next time the function is called, use the
+stored number and repeat.
 
-* reprovisioning the same server generates different name
+This guarantees that two same names are only returned after 33,554,432 calls, so there is plenty
+of names for everyone.
 
-## Usage
+If you want more details, it is based on [Fibonacci linear feedback shift register](https://en.wikipedia.org/wiki/Linear_feedback_shift_register)
+with polynomial (tap 0x10002A3):
 
-Random LFSR non-repeating generator example:
+	x^25 + x^10 + x^8 + x^6 + x^2 + x + 1.
 
-	require "deacon"
-	register = Deacon::RandomGenerator::random_initial_seed
-	generator = Deacon::RandomGenerator.new
-	(1..5).each do |_|
-	  # store the register in non-volatile memory (e.g. on disk)
-	  register, firstname, lastname = generator.generate(register)
-	  puts firstname + ' ' + lastname
-	end
-
-Example output:
-
-	LOREN SPAHN
-	JULIO GIMBEL
-	CORY SIBILIO
-	PATSY CUSSON
-	HUGH SHIMER
-
-By default, same firstname or surname successions are removed. To avoid that
-behavior (e.g. in stateless applications where you can't store register), use
-
-	register, firstname, lastname = generator.generate(register, false)
-
-Random LFSR generator example:
-
-	require "deacon"
-	generator = Deacon::RandomGenerator.new
-	(1..5).each do |_|
-	  # ignoring the register can lead to duplicities!
-	  _, firstname, lastname = generator.generate
-	  puts firstname + ' ' + lastname
-	end
-
-MAC generator example:
-
-	require "deacon"
-	generator = Deacon::MacGenerator.new
-	firstname, lastname = generator.generate("AA:BB:CC:DD:EE:FF")
-	puts firstname + ' ' + lastname
+There is exactly 66046 states when given name or surname is the same as the previous
+state. Fun fact - due to nature of the pseudorandom generator, these names are only:
+Aaron, Wilma, Aaberg and Zywiec (the last and the first of firstnames and surnames).
+There is a boolean flag that will cause these names with she same firstname or surname
+to be skipped.
 
 ## Contributing
 

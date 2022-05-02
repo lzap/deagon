@@ -16,7 +16,7 @@ func TestUppercaseSpaceFormatter(t *testing.T) {
 		"AGNES AABERG",
 	}
 	for i := 0; i < 8; i++ {
-		got := getName(int32(i), NewUppercaseSpaceFormatter())
+		got := getName(i, NewUppercaseSpaceFormatter())
 		if want[i] != got {
 			t.Fatalf(`Expected to get %s but got %#q`, want[i], got)
 		}
@@ -35,7 +35,7 @@ func TestCapitalizedSpaceFormatter(t *testing.T) {
 		"Agnes Aaberg",
 	}
 	for i := 0; i < 8; i++ {
-		got := getName(int32(i), NewCapitalizedSpaceFormatter())
+		got := getName(i, NewCapitalizedSpaceFormatter())
 		if want[i] != got {
 			t.Fatalf(`Expected to get %s but got %#q`, want[i], got)
 		}
@@ -54,7 +54,7 @@ func TestLowercaseDashFormatter(t *testing.T) {
 		"agnes-aaberg",
 	}
 	for i := 0; i < 8; i++ {
-		got := getName(int32(i), NewLowercaseDashFormatter())
+		got := getName(i, NewLowercaseDashFormatter())
 		if want[i] != got {
 			t.Fatalf(`Expected to get %s but got %#q`, want[i], got)
 		}
