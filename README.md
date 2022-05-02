@@ -70,8 +70,10 @@ Wendy Doubek
 Jim Burda
 Emma Markee
 18612351
-
 ```
+
+The algorithm eliminates results with same given names or surnames, there is exactly 66046 of them, therefore the
+total number of unique names available is 33,488,385. This is an implementation detail that is elaborated below.
 
 ### Go library
 
