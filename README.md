@@ -1,8 +1,8 @@
 # [Deagon](https://github.com/lzap/deagon) - human readable random name generator
 
-Out of ideas for host names in your cluster? This little Go library and a CLI can help.
-Generates unique names based on frequently occurring given names and surnames
-from the 1990 US Census (public domain data):
+Out of ideas for host names in your cluster? This little Go library and a CLI
+can help.  Generates unique names based on frequently occurring given names and
+surnames from the 1990 US Census (public domain data):
 
 * 256 (8 bits) unique male given names
 * 256 (8 bits) unique female given names
@@ -13,11 +13,12 @@ Given names were filtered to be 3-5 characters long, surnames 5-8 characters,
 therefore generated names are never longer than 14 characters (5+1+8).
 
 This gives 33,554,432 (25 bits) total of male and female name combinations.
-Built-in generator can either generate randomized succession, or generate
-combinations based on MAC addresses.
+Built-in generator can either generate pseudo random unique succession (full
+cycle linear feedback register) or generate pseudo random names with a time
+seed.
 
-Both command line utility and Go library with random or unique pseudorandom sequence
-generators are available.
+Both command line utility and Go library with random or unique pseudorandom
+sequence generators are available.
 
 Similar project exists for Ruby too: https://github.com/lzap/deacon
 
@@ -59,9 +60,10 @@ Logan Bushner
 Shane Bondi
 ```
 
-To generate sequence of unique names, you must provide a starting seed number between 1 and 2^25-2 (33,554,430).
-The names are guaranteed to be unique. The last line contains the next seed value that must be passed in
-to continue in the unique sequence.
+To generate sequence of unique names, you must provide a starting seed number
+between 1 and 2^25-2 (33,554,430).  The names are guaranteed to be unique. The
+last line contains the next seed value that must be passed in to continue in
+the unique sequence.
 
 ```
 # generate -n 10 -s 130513
@@ -78,8 +80,11 @@ Emma Markee
 18612351
 ```
 
-The algorithm eliminates results with same given names or surnames, there is exactly 66046 of them, therefore the
-total number of unique names available is 33,488,385. This is an implementation detail that is elaborated below.
+The algorithm eliminates pairs with same given names or surnames, there is
+exactly 66046 of them, therefore the total number of unique names available is
+33,488,385. This covers the fact that the pseudo-random generator is not
+perfect and there are parts of the period which generates names with the same
+givenname or surname multiple times. See below for details.
 
 ### Go library
 
@@ -114,28 +119,31 @@ func main() {
 
 ### Pseudo-random generator
 
-Generating names randomly does not guarantee uniqueness. There is, however, a technique
-called full cycle feedback register that ensures that two outputs never repeat for a given
-sequence of pseudorandom numbers.
+Generating names randomly does not guarantee uniqueness. There is, however, a
+technique called full cycle feedback register that ensures that two outputs
+never repeat for a given sequence of pseudorandom numbers until all numbers
+are exhausted.
 
-How it works, you pick a random integer between 1 and 2^25-2 (33,554,430) and pass it to a
-function which returns a random name and the next number in the full cycle sequence. You need
-to store the number somewhere (database) and the next time the function is called, use the
-stored number and repeat.
+How it works, you pick a random integer between 1 and 2^25-2 (33,554,430) and
+pass it to a function which returns a random name and the next number in the
+full cycle sequence. You need to store the number somewhere (database) and the
+next time the function is called, use the stored number and repeat.
 
-This guarantees that two same names are only returned after 33,554,432 calls, so there is plenty
-of names for everyone.
+This guarantees that two same names are only returned after 33,554,432 calls,
+so there is plenty of names for everyone. This is guaranteed (and tested) to
+never return a same name so there is no need to do uniqueness check.
 
-If you want more details, it is based on [Fibonacci linear feedback shift register](https://en.wikipedia.org/wiki/Linear_feedback_shift_register)
-with polynomial (tap 0x10002A3):
+If you want more details, it is based on [Fibonacci linear feedback shift
+register](https://en.wikipedia.org/wiki/Linear_feedback_shift_register) with
+polynomial (tap 0x10002A3):
 
 	x^25 + x^10 + x^8 + x^6 + x^2 + x + 1.
 
-There is exactly 66046 states when given name or surname is the same as the previous
-state. Fun fact - due to nature of the pseudorandom generator, these names are only:
-Aaron, Wilma, Aaberg and Zywiec (the last and the first of firstnames and surnames).
-There is a boolean flag that will cause these names with she same firstname or surname
-to be skipped.
+There is exactly 66046 states when given name or surname is the same as the
+previous state. Fun fact - due to nature of the pseudorandom generator, these
+names are only: Aaron, Wilma, Aaberg and Zywiec (the last and the first of
+firstnames and surnames).  There is a boolean flag that will cause these names
+with she same firstname or surname to be skipped.
 
 ## Contributing
 
