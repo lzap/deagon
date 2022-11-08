@@ -109,6 +109,9 @@ func main() {
 	// generate capitalized with space
 	fmt.Println(deagon.RandomName(deagon.NewCapitalizedSpaceFormatter()))
 	
+    // generate from an integer (only low 25 bits are used)
+	fmt.Println(deagon.Name(deagon.NewCapitalizedSpaceFormatter(), 130513))
+
 	// generate pseudorandom unique sequence
 	seed := 543235432
 	nextSeed, name1 := deagon.PseudoRandomName(seed, true, deagon.NewCapitalizedSpaceFormatter())
