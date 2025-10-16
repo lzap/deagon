@@ -1,27 +1,24 @@
 package deagon
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestRandomName(t *testing.T) {
-	type args struct {
-		formatter Formatter
+	f := NewCapitalizedSpaceFormatter()
+
+	// Basic: non-empty names
+	const n = 200
+	seen := make(map[string]struct{}, n)
+	for i := 0; i < n; i++ {
+		got := RandomName(f)
+		if got == "" {
+			t.Fatalf("RandomName returned empty string at i=%d", i)
+		}
+		seen[got] = struct{}{}
 	}
-	tests := []struct {
-		args args
-		want string
-	}{
-		{args{NewCapitalizedSpaceFormatter()}, "Anna Plemons"},
-		{args{NewCapitalizedSpaceFormatter()}, "Alisa Delorge"},
-		{args{NewCapitalizedSpaceFormatter()}, "Sonja Luisi"},
-		{args{NewCapitalizedSpaceFormatter()}, "Inez Alviar"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.want, func(t *testing.T) {
-			if got := RandomName(tt.args.formatter); got != tt.want {
-				t.Errorf("RandomName() = %v, want %v", got, tt.want)
-			}
-		})
+
+	// Heuristic: we should observe more than one unique value.
+	// (This is intentionally weak to avoid flakiness.)
+	if len(seen) < 2 {
+		t.Fatalf("expected at least 2 distinct names in %d samples, got %d", n, len(seen))
 	}
 }

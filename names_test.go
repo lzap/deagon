@@ -1,8 +1,9 @@
 package deagon
 
 import (
-	"github.com/lzap/deagon/corpus"
 	"testing"
+
+	"github.com/oakroots/deagon/corpus"
 )
 
 func TestFirstFemaleNameFind(t *testing.T) {

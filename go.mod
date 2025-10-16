@@ -1,5 +1,5 @@
-module github.com/lzap/deagon
+module github.com/oakroots/deagon
 
-go 1.18
+go 1.25
 
-require golang.org/x/text v0.4.0
+require golang.org/x/text v0.30.0
