@@ -51,35 +51,43 @@ func TestPseudoRandom25Starting42(t *testing.T) {
 
 func TestCloseNames(t *testing.T) {
 	value := 1
-	seen := make(map[string]bool)
+	seen := make(map[string]struct{})
 	counter := 0
 	var last1, last2 string
-	for i := 0; i < int(totalEntriesFull)-1; i++ {
+
+	for range int(totalEntriesFull) - 1 {
 		value = lfsr25(value)
 		n1, n2 := getNames(value)
 		if last1 == n1 {
 			counter++
-			seen[n1] = true
+			seen[n1] = struct{}{}
 		}
 		if last2 == n2 {
 			counter++
-			seen[n2] = true
+			seen[n2] = struct{}{}
 		}
 		last1 = n1
 		last2 = n2
 	}
+
 	if counter > 66046 {
 		t.Errorf("expected %d number of close names, got %d", 66046, counter)
 	}
+
 	if len(seen) != 4 {
 		t.Errorf("expected see exactly AARON, WILMA, AABERG and ZYWIEC in the repetitions but got something else: %v", seen)
 	}
 }
 
-func TestPseudoRandomNameDoesNotCycle(t *testing.T) {
+func TestLFSR25Cycle(t *testing.T) {
 	seed := 1
-	for i := 0; i < int(totalEntriesFull)-1; i++ {
-		seed, _ = PseudoRandomName(seed, true, NewEmptyFormatter())
+
+	for range int(totalEntriesFull) - 1 {
+		seed = lfsr25(seed)
+	}
+
+	if seed != 1 {
+		t.Errorf("LFSR25 did not cycle back to initial seed, got %d", seed)
 	}
 }
 
@@ -108,11 +116,12 @@ Caleb Gibbard
 Bert Orick
 `
 	seed := 1
-	for i := 0; i < 20; i++ {
+	for range 20 {
 		seed, name = PseudoRandomName(seed, false, NewCapitalizedSpaceFormatter())
 		b.WriteString(name)
 		b.WriteString("\n")
 	}
+
 	if b.String() != expected {
 		t.Fatalf("result not expected: %s", b.String())
 	}
@@ -143,11 +152,12 @@ Bobby Lupkes
 Leah Fessler
 `
 	seed := 1
-	for i := 0; i < 20; i++ {
+	for range 20 {
 		seed, name = PseudoRandomName(seed, true, NewCapitalizedSpaceFormatter())
 		b.WriteString(name)
 		b.WriteString("\n")
 	}
+
 	if b.String() != expected {
 		t.Fatalf("result not expected: %s", b.String())
 	}
