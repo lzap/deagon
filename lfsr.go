@@ -19,10 +19,11 @@ func lfsr25(seed int) int {
 // via the provided formatter. Returns the next state which must be provided for the
 // next call, and the generated name.
 //
-// Sequence of names is guaranteed to be unique until it cycles after 2^25-2 calls.
+// The sequence of names is guaranteed to be unique until it cycles after 2^25-1 calls.
 //
-// When eliminateCloseNames is set, successive calls never return same firstname or surname.
-// This eliminates 66046 possible values, so the loop is slightly shorter.
+// When eliminateCloseNames is set, the generated name will not share a firstname or
+// surname with the name associated with the input seed. This eliminates 66046
+// possible names from the sequence, making the cycle shorter.
 func PseudoRandomName(seed int, eliminateCloseNames bool, formatter Formatter) (int, string) {
 	var next int = seed
 	seedN1, seedN2 := getNames(seed)
