@@ -1,26 +1,26 @@
-# [Deagon](https://github.com/lzap/deagon) - human readable random name generator
+# [Deagon](https://github.com/lzap/deagon) - Human-Readable Random Name Generator
 
-Out of ideas for host names in your cluster? This little Go library and a CLI
-can help.  Generates unique names based on frequently occurring given names and
+Out of ideas for hostnames in your cluster? This little Go library and CLI can
+help. It generates unique names based on frequently occurring given names and
 surnames from the 1990 US Census (public domain data):
 
 * 256 (8 bits) unique male given names
 * 256 (8 bits) unique female given names
 * 65,536 (16 bits) unique surnames
-* with over 120 gender-neutral given names
+* Includes over 120 gender-neutral given names
 
-Given names were filtered to be 3-5 characters long, surnames 5-8 characters,
-therefore generated names are never longer than 14 characters (5+1+8).
+Given names are filtered to be 3–5 characters long and surnames 5–8 characters.
+Therefore, generated names are never longer than 14 characters (5+1+8).
 
-This gives 33,554,432 (25 bits) total of male and female name combinations.
-Built-in generator can either generate pseudo random unique succession (full
-cycle linear feedback register) or generate pseudo random names with a time
-seed.
+This provides a total of 33,554,432 (2^25) combinations of male and female names.
+The built-in generator can produce either a pseudo-random unique succession of
+names (using a full-cycle linear feedback shift register) or generate
+pseudo-random names seeded by the current time.
 
-Both command line utility and Go library with random or unique pseudorandom
-sequence generators are available.
+A command-line utility and a Go library are both available, providing random or
+unique pseudo-random sequence generation.
 
-Similar project exists for Ruby too: https://github.com/lzap/deacon
+A similar project also exists for Ruby: https://github.com/lzap/deacon
 
 ### Installation
 
@@ -37,14 +37,14 @@ To generate a random name, just use the CLI utility:
 Elisabeth Sobeck
 ```
 
-To generate output in lower case without space:
+To generate output in lowercase with a dash instead of a space:
 
 ```
 # generate -d
 ted-faron
 ```
 
-To generate arbitrary amount of random names:
+To generate an arbitrary number of random names:
 
 ```
 # generate -n 10
@@ -60,10 +60,10 @@ Logan Bushner
 Shane Bondi
 ```
 
-To generate sequence of unique names, you must provide a starting seed number
-between 1 and 2^25-2 (33,554,430).  The names are guaranteed to be unique. The
-last line contains the next seed value that must be passed in to continue in
-the unique sequence.
+To generate a sequence of unique names, you must provide a starting seed number
+between 1 and 2^25 - 2 (33,554,430). The names are guaranteed to be unique
+within a full cycle. The last line of the output contains the next seed value
+that must be passed in to continue the unique sequence.
 
 ```
 # generate -n 10 -s 130513
@@ -80,15 +80,16 @@ Emma Markee
 18612351
 ```
 
-The algorithm eliminates pairs with same given names or surnames, there is
-exactly 66046 of them, therefore the total number of unique names available is
-33,488,385. This covers the fact that the pseudo-random generator is not
-perfect and there are parts of the period which generates names with the same
-givenname or surname multiple times. See below for details.
+The algorithm can optionally eliminate pairs with the same given name or surname
+as the previous entry. There are exactly 66,046 such pairs, which reduces the
+total number of unique names in the sequence to 33,488,385. This feature
+addresses the fact that the pseudo-random generator, by its nature, will
+occasionally produce consecutive names that share a first name or surname. See
+below for details.
 
 ### Go library
 
-The library provides random generation:
+The library provides both random and sequential name generation:
 
 ```go
 package main
@@ -102,17 +103,17 @@ import (
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
-	
-	// generate lower case with dash
+
+	// Generate lower case with a dash
 	fmt.Println(deagon.RandomName(deagon.NewLowercaseDashFormatter()))
-	
-	// generate capitalized with space
+
+	// Generate capitalized with a space
 	fmt.Println(deagon.RandomName(deagon.NewCapitalizedSpaceFormatter()))
-	
-    // generate from an integer (only low 25 bits are used)
+
+	// Generate from an integer (only the lower 25 bits are used)
 	fmt.Println(deagon.Name(deagon.NewCapitalizedSpaceFormatter(), 130513))
 
-	// generate pseudorandom unique sequence
+	// Generate a pseudo-random unique sequence
 	seed := 543235432
 	nextSeed, name1 := deagon.PseudoRandomName(seed, true, deagon.NewCapitalizedSpaceFormatter())
 	_, name2 := deagon.PseudoRandomName(nextSeed, true, deagon.NewCapitalizedSpaceFormatter())
@@ -120,33 +121,35 @@ func main() {
 }
 ```
 
-### Pseudo-random generator
+### Pseudo-Random Generator
 
 Generating names randomly does not guarantee uniqueness. There is, however, a
-technique called full cycle feedback register that ensures that two outputs
-never repeat for a given sequence of pseudorandom numbers until all numbers
-are exhausted.
+technique called a Linear Feedback Shift Register (LFSR) with a full-cycle
+polynomial that ensures no output is repeated until the entire sequence of
+numbers is exhausted.
 
-How it works, you pick a random integer between 1 and 2^25-2 (33,554,430) and
-pass it to a function which returns a random name and the next number in the
-full cycle sequence. You need to store the number somewhere (database) and the
-next time the function is called, use the stored number and repeat.
+It works by picking an integer between 1 and 2^25 - 2 (33,554,430) and passing
+it to a function. The function returns a random name and the next number in the
+full-cycle sequence. You need to store this number, and the next time you call
+the function, use the stored number to continue the sequence.
 
-This guarantees that two same names are only returned after 33,554,432 calls,
-so there is plenty of names for everyone. This is guaranteed (and tested) to
-never return a same name so there is no need to do uniqueness check.
+This guarantees that the same name is only returned after 33,554,432 calls, so
+there are plenty of names for everyone. The sequence is guaranteed (and tested)
+to never return the same name within a full cycle, so there is no need to
+perform an external uniqueness check.
 
-If you want more details, it is based on [Fibonacci linear feedback shift
+The implementation is based on a [Fibonacci linear feedback shift
 register](https://en.wikipedia.org/wiki/Linear_feedback_shift_register) with
-polynomial (tap 0x10002A3):
+the polynomial `x^25 + x^10 + x^8 + x^6 + x^2 + x + 1` (tap `0x10002A3`).
 
-	x^25 + x^10 + x^8 + x^6 + x^2 + x + 1.
-
-There is exactly 66046 states when given name or surname is the same as the
-previous state. Fun fact - due to nature of the pseudorandom generator, these
-names are only: Aaron, Wilma, Aaberg and Zywiec (the last and the first of
-firstnames and surnames).  There is a boolean flag that will cause these names
-with she same firstname or surname to be skipped.
+Within the sequence, there are exactly 66,046 instances where a generated name
+has the same given name or surname as the name from the previous state. This is
+not a flaw but a mathematical property of the LFSR sequence. Fun fact: due to
+the structure of the name lists, these repetitions only occur with the names
+Aaron, Wilma, Aaberg, and Zywiec (the first and last entries of the first name
+and surname lists). A boolean flag is available in the `PseudoRandomName`
+function to skip these entries if a strictly unique first and last name is
+required between consecutive calls.
 
 ## Contributing
 
