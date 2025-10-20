@@ -1,10 +1,13 @@
 package deagon
 
 import (
+	"math/rand"
 	"testing"
 )
 
 func TestRandomName(t *testing.T) {
+	rand.Seed(1)
+
 	type args struct {
 		formatter Formatter
 	}
