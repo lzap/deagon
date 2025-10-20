@@ -1,17 +1,23 @@
 package deagon
 
+import "math/bits"
+
 const MASK int = 0x1ffffff
 
-// Taps from http://users.ece.cmu.edu/~koopman/lfsr/25.txt
-// 1000004 1000007 1000016 ... 1FFFFE9 1FFFFEA 1FFFFF7 1FFFFF8
+// lfsr25Taps is a bitmask for the tap positions 0, 1, 2, 6, 8, 10, and 25 of
+// 0x10002A3 which is in binary 0b0001000000000000001010100011.
+//
+// A tap from http://users.ece.cmu.edu/~koopman/lfsr/25.txt
+const lfsr25Taps = (1 << 0) | (1 << 1) | (1 << 2) | (1 << 6) | (1 << 8) | (1 << 10) | (1 << 25)
 
 func lfsr25(seed int) int {
 	s := seed
 	if s == 0 {
 		s = 1
 	}
-	// 0x10002A3 = 0b0001000000000000001010100011
-	b := ((s >> 0) ^ (s >> 1) ^ (s >> 2) ^ (s >> 6) ^ (s >> 8) ^ (s >> 10) ^ (s >> 25)) & MASK
+	// Calculate the parity of the tapped bits.
+	// If the number of set bits is odd, the parity is 1, otherwise 0.
+	b := bits.OnesCount(uint(s&lfsr25Taps)) & 1
 	return ((s >> 1) | (b << 24)) & MASK
 }
 

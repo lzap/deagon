@@ -5,6 +5,32 @@ import (
 	"testing"
 )
 
+func TestLfsr25Fixtures(t *testing.T) {
+	fixtures := []struct {
+		in  int
+		out int
+	}{
+		{1, 16777216},
+		{2, 16777217},
+		{3, 1},
+		{4, 16777218},
+		{5, 2},
+		{6, 3},
+		{7, 16777219},
+		{8, 4},
+		{9, 16777220},
+		{10, 16777221},
+		{42, 16777237},
+		{100, 50},
+	}
+
+	for _, f := range fixtures {
+		if got := lfsr25(f.in); got != f.out {
+			t.Errorf("lfsr25(%d) = %d, want %d", f.in, got, f.out)
+		}
+	}
+}
+
 func testWithInitialValue(t *testing.T, start int) {
 	value := start
 	for i := 0; i < int(totalEntriesFull)-1; i++ {
