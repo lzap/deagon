@@ -31,18 +31,14 @@ func lfsr25(seed int) int {
 // surname with the name associated with the input seed. This eliminates 66046
 // possible names from the sequence, making the cycle shorter.
 func PseudoRandomName(seed int, eliminateCloseNames bool, formatter Formatter) (int, string) {
-	var next int = seed
-	seedN1, seedN2 := getNames(seed)
+	next := lfsr25(seed)
 	if eliminateCloseNames {
-		for {
+		seedN1, seedN2 := getNames(seed)
+		n1, n2 := getNames(next)
+		for n1 == seedN1 || n2 == seedN2 {
 			next = lfsr25(next)
-			n1, n2 := getNames(next)
-			if n1 != seedN1 && n2 != seedN2 {
-				break
-			}
+			n1, n2 = getNames(next)
 		}
-	} else {
-		next = lfsr25(seed)
 	}
 	return next, getName(next, formatter)
 }
